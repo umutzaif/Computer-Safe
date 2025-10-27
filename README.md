@@ -1,4 +1,4 @@
-# 💻 Güvenlik Kamerası ve İzinsiz Giriş Tespit Sistemi (OpenCV Tabanlı)
+# 💻 Güvenlik Kamerası ve İzinsiz Giriş Tespit Sistemi
 
 Bu proje, bir bilgisayarın gözetimsiz bırakıldığı durumlarda **izinsiz girişleri tespit etmek** ve potansiyel davetsiz misafirleri caydırmak için **OpenCV** kütüphanesinin gücünden yararlanır. Sistem, web kamerası görüntülerindeki piksel değişikliklerini izler ve belirlenen eşiğin üzerinde bir hareket algılandığında bir alarm çalarak kullanıcıyı uyarır.
 
