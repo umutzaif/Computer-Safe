@@ -138,7 +138,7 @@ while(1):
 		cv2.rectangle(frame_yeni, (10,10),(630,470), (0, 255, 0), 5 )
 		cv2.putText(frame_yeni, "SAFETY", (55,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
 	if saldiri_sayisi == 30:
-		os.system("voice file path")
+		os.system("<voice warning path>")
 		cv2.waitKey(100)
 	elif saldiri_sayisi == 40:
 		os.system("voice file path")
@@ -151,7 +151,7 @@ while(1):
 		msg['Subject'] = 'PC INFO'
 		body2 = 'Saldırı eşiği aşıldı. Saldırganların videosu postaya eklendi, Bilgisayarınız kapatıldı.'
 		msg.attach(MIMEText(body2, 'plain'))
-		filename = r'C:\\Users\\uzaib\\OneDrive\\Masaüstü\\C DERSLER\\capture.mp4'
+		filename = r'<file path>'
 		attachment = open(filename, 'rb')
 		part = MIMEBase('application', 'octet-stream')
 		part.set_payload((attachment).read())
@@ -166,7 +166,7 @@ while(1):
 		server2.quit()
 		"""
 		#playsound(r"voice file path")
-		os.system("mplayer /home/tesla/Masaüstü/umut/OpenCV/kapanma.m4a")
+		os.system("mplayer <voice warning path>")
 		cv2.waitKey(1000)
 		os.system("poweroff")
 		break
