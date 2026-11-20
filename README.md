@@ -1,68 +1,127 @@
-# 💻 Güvenlik Kamerası ve İzinsiz Giriş Tespit Sistemi
-
-Bu proje, bir bilgisayarın gözetimsiz bırakıldığı durumlarda **izinsiz girişleri tespit etmek** ve potansiyel davetsiz misafirleri caydırmak için **OpenCV** kütüphanesinin gücünden yararlanır. Sistem, web kamerası görüntülerindeki piksel değişikliklerini izler ve belirlenen eşiğin üzerinde bir hareket algılandığında bir alarm çalarak kullanıcıyı uyarır.
+# 💻 Computer-Safe — Güvenlik Kamerası ve İzinsiz Giriş Tespit Sistemi
 
 > "Bilgisayarınıza kötü niyetli planlar kuranları korkudan çılgına çevirecek bir program!"
 
----
+Bilgisayarınızın kamerasıyla önündeki hareketi algılayan, alarm çalan, olayı
+**zaman damgalı video ve fotoğraf** olarak kaydeden ve size **e-posta** ile
+bildiren bir Windows uygulaması. OpenCV'nin arka plan çıkarma (MOG2) algoritmasını
+kullanır.
 
-## ✨ Özellikler
+> *English summary:* Computer-Safe watches your webcam while you are away. On
+> motion it sounds an alarm, records timestamped video/snapshots to a folder you
+> choose, e-mails you (queued and retried when offline) and can lock or shut
+> down the PC. SMTP passwords are kept in Windows Credential Manager; the admin
+> password is stored only as a salted PBKDF2 hash. Ships as a single `.exe`.
 
-* **Hareket Algılama:** OpenCV ile canlı kamera görüntüsündeki **değişen pikselleri** tespit eder.
-* **Sesli Alarm:** Belirlenen hareket eşiği aşıldığında bir uyarı alarmı çalar (yüklediğiniz dosya yolunda).
-* **Saldırgan Fotoğrafı Çekme:** İzinsiz giriş yapan kişinin fotoğrafını çekme yeteneği.
-* **E-posta Bildirimi (Opsiyonel):** Çekilen fotoğrafları size e-posta ile gönderme imkanı (kodda yorum satırı olarak mevcuttur).
-* **Kişiselleştirilebilir Hassasiyet:** Çevreye göre ayarlanabilir hareket algılama hassasiyeti (`pixelcounter` değişkeni).
-* **Güvenli Kapatma (Opsiyonel):** Saldırı durumunda bilgisayarı kapatma komutu.
-* **Geri Sayım (Intro):** Program başladığında ortamdan ayrılmanız için süre tanıyan başlangıç bloğu.
+## Özellikler
 
----
+- **Tek dosyalık exe** – Python kurmadan çalışır (`ComputerSafe.exe`).
+- **Ayarlar penceresi** – kayıt klasörü, kamera, hassasiyet, e-posta alıcıları vb.
+  tamamen arayüzden ayarlanır; koda dokunmak gerekmez.
+- **Zaman damgalı kayıt** – hareket başlayınca video kaydı başlar (hareketten
+  önceki 2 sn dahil), hareket bitince kapanır. Dosyalar gün klasörlerine kaydedilir:
+  ```
+  Kayıt klasörü\2026-11-20\ComputerSafe_2026-11-20_21-15-03.mp4
+  Kayıt klasörü\2026-11-20\ComputerSafe_2026-11-20_21-15-03.jpg
+  ```
+  Görüntünün üzerine de tarih-saat yazılır.
+- **Kademeli alarm**
+  1. Hareket → bip sesi, kayıt başlar
+  2. Uyarı eşiği → alarm sesi + fotoğraflı e-posta
+  3. Kritik eşik → ikinci alarm + e-posta + seçilen işlem (ekranı kilitle /
+     bilgisayarı 60 sn sonra kapat / hiçbir şey yapma)
+  4. Video tamamlanınca videolu e-posta
+- **İnternet yokken çökmez** – e-postalar önce diske (kuyruğa) yazılır; bağlantı
+  yoksa kuyrukta bekler ve internet gelince otomatik gönderilir. Program kapanıp
+  açılsa bile bekleyen e-postalar kaybolmaz.
+- **Şifre güvenliği** – bkz. [Güvenlik](#güvenlik).
+- **Yönetici şifresi** – koruma, yönetici şifresi girilmeden durdurulamaz;
+  3 hatalı denemede 30 sn kilitlenir.
+- **Windows açılışında otomatik başlatma** (isteğe bağlı).
+- **Kamera koparsa** program kapanmaz, kamerayı yeniden bağlamayı dener.
 
-## 🛠️ Kurulum
+## Kullanım
 
-Projeyi çalıştırmak için gerekli Python kütüphanelerini kurmanız gerekmektedir.
+1. `ComputerSafe.exe`'yi çalıştırın. (İmzasız exe olduğu için Windows SmartScreen
+   uyarı verebilir: *Ek bilgi → Yine de çalıştır*.)
+2. İlk açılışta bir **yönetici şifresi** belirleyin.
+3. Ayarlar penceresinde:
+   - **Genel:** kayıt klasörünü seçin, saldırı eşiğinde yapılacak işlemi belirleyin.
+   - **E-posta:** servis seçin (Outlook, Gmail, Yandex...), gönderen adresi,
+     şifreyi ve alıcıları (virgülle) girin. **Test e-postası gönder** ile deneyin.
+   - **Algılama:** hassasiyeti ortamınıza göre deneyerek ayarlayın.
+4. **Korumayı Başlat**'a basın. Başlangıç gecikmesi süresince (varsayılan 10 sn)
+   ortamdan uzaklaşın; program bu sürede arka planı öğrenir.
+5. Durdurmak için **Korumayı Durdur**'a basıp yönetici şifresini girin.
 
-1.  Gerekli kütüphaneleri (başta **OpenCV**) kurun:
+### E-posta şifresi hakkında
 
-    ```bash
-    pip install opencv-python
-    ```
-    
-    > **Not:** Alarm sesini çalmak için kullandığınız kütüphaneyi de buraya eklemeyi unutmayın (örneğin, `playsound` veya `simpleaudio`).
+Gmail, Outlook ve Yandex gibi servisler normal hesap şifresiyle SMTP girişine
+genellikle izin vermez. İki adımlı doğrulamayı açıp hesabınızdan bir
+**uygulama şifresi** oluşturun ve onu kullanın:
 
-2.  Kodu yerel bilgisayarınıza indirin veya klonlayın.
-3.  Kamera ve internet bağlantınızın çalıştığından emin olun.
+- Gmail: Google Hesabı → Güvenlik → Uygulama şifreleri
+- Outlook/Hotmail: Microsoft hesabı → Güvenlik → Gelişmiş güvenlik seçenekleri → Uygulama şifreleri
+  (Microsoft bazı kişisel hesaplarda SMTP ile şifre girişini kapatmış olabilir; bu durumda Gmail önerilir.)
 
----
+## Güvenlik
 
-## ⚙️ Ayarlar ve Kişiselleştirme
+| Bilgi | Nasıl saklanır |
+| --- | --- |
+| Yönetici şifresi | Sadece **PBKDF2-HMAC-SHA256** özeti (600.000 iterasyon, rastgele 16 bayt tuz). Şifrenin kendisi hiçbir yerde tutulmaz; doğrulama sabit zamanlı karşılaştırma ile yapılır. |
+| E-posta (SMTP) şifresi | **Windows Kimlik Bilgisi Yöneticisi**'nde (Credential Manager). Windows bunu DPAPI ile kullanıcı hesabınıza bağlı olarak şifreler. Ayar dosyasına veya diske düz metin yazılmaz. |
+| Diğer ayarlar | `%APPDATA%\ComputerSafe\config.json` |
 
-Program, farklı senaryolara ve kişisel tercihlere göre kolayca özelleştirilebilecek değişkenler içerir. Lütfen kodu inceleyerek aşağıdaki ayarları **Türkçe yorum satırları** doğrultusunda değiştirin:
+> Neden e-posta şifresi de hash'lenmiyor? Hash tek yönlüdür; SMTP sunucusuna
+> giriş yaparken şifrenin kendisini göndermek gerekir. Bu yüzden geri
+> çözülebilmesi gereken sırlar için doğru yöntem, işletim sisteminin şifreli
+> kasasıdır. Hash, yalnızca doğrulanması gereken yönetici şifresi için kullanılır.
 
-### 1. Hareket Algılama Hassasiyeti
+## Dosya konumları
 
-* **Değişken:** `pixelcounter`
-* **Açıklama:** Bu değişken, hareketin algılanması için değişmesi gereken minimum piksel sayısını belirler. Çevrenizdeki ışık, kamera kalitesi ve ortamdaki titreşimlere göre en doğru değeri bulmak için denemeler yapın.
+| Ne | Nerede |
+| --- | --- |
+| Ayarlar | `%APPDATA%\ComputerSafe\config.json` |
+| Log dosyası | `%APPDATA%\ComputerSafe\logs\computer_safe.log` |
+| Gönderilmeyi bekleyen e-postalar | `%APPDATA%\ComputerSafe\outbox\` |
+| Video / fotoğraflar | Ayarlarda seçtiğiniz klasör (varsayılan `Videolar\ComputerSafe`) |
 
-### 2. Alarm Sesi Ayarları
+Sorun giderme: `ComputerSafe.exe --self-test` ses dosyalarını, şifre kasasını ve
+kamerayı kontrol edip sonucu log dosyasına yazar.
 
-* **Değişkenler:** `f` ve `d`
-* **Açıklama:**
-    * `f` değişkeni: Alarm sesinin **frekansını (tone)** belirler.
-    * `d` değişkeni: Alarm sesinin çalınma **sıklığını (frequency)** ayarlar.
+## Geliştirme
 
-### 3. Başlangıç (Intro) Süresi
+Gereksinim: Windows, Python 3.10+ (tkinter dahil).
 
-Bu blok, program açıldığında ortamdan ayrılmanız için size süre tanır.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe koruma.py        # kaynak koddan çalıştır
+.\.venv\Scripts\python.exe -m pytest -q     # testler
+```
 
-* **Geri Sayım Tekrarı:** `a` değişkeni, intro bloğunun kaç kez sayım yapacağını belirler.
-* **Gecikme Süresi:** `cv2.waitkey()` fonksiyonunun içindeki parametreyi değiştirin. Buradaki değer milisaniye cinsindendir. Örneğin, 5 saniye bekleme için `5000` değerini kullanın.
+Exe derlemek (testleri çalıştırır, `dist\ComputerSafe.exe` üretir):
 
-### 4. Gelişmiş Özellikler (E-posta & Kapatma)
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build.ps1
+```
 
-Bu özellikler, varsayılan olarak **yorum satırı** (`#`) içindedir ve kullanmak için yorum işaretleri kaldırılmalıdır.
+### Proje yapısı
 
-| Özellik | Açıklama | Dikkat Edilmesi Gerekenler |
-| :--- | :--- | :--- |
-| **E-posta Gönderme** | Saldırganın fotoğrafını size e-posta ile gönderir. | **Kodu yorum satırından kaldırırsanız, cihazınız internete bağlıyken e-posta gönderme komutları hata verecektir.** Bu komutları yalnızca internet bağlantısı kesikken ve uygun e-posta kütüphanesi yapılandırması yapılmışken kullanmalısınız. |
-| **Bilgisayarı Kapatma** | İzinsiz giriş durumunda bilgisayarı kapatır (`os.system("poweroff")`). | Mevcut komut (`os.system("poweroff")`) **Linux terminalleri** için uygundur. Windows veya Mac kullanıcıları, işletim sistemlerine uygun kapatma komutunu (örneğin Windows için `shutdown /s /t 1`) bu parametre ile değiştirmelidir. |
+```
+koruma.py                  Başlatıcı
+computer_safe/
+  app.py                   Giriş noktası, log, tek kopya kontrolü
+  config.py                Ayarlar (JSON)
+  security.py              PBKDF2 şifre özeti + Windows Kimlik Bilgisi Yöneticisi
+  monitor.py               Kamera döngüsü ve alarm seviyeleri
+  detector.py              MOG2 hareket algılama
+  recorder.py              Zaman damgalı video / fotoğraf kaydı
+  mailer.py                Çevrimdışı kuyruklu e-posta gönderimi
+  alarm.py                 Sesler, ekran kilitleme, kapatma
+  overlay.py               Görüntü üzerindeki yazılar
+  autostart.py             Windows açılışında başlatma
+  gui/                     Tkinter pencereleri
+assets/                    Alarm sesleri
+tests/                     Birim testleri
+```
