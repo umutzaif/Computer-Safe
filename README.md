@@ -1,4 +1,6 @@
-# Computer-Safe
+# 💻 Computer-Safe — Güvenlik Kamerası ve İzinsiz Giriş Tespit Sistemi
+
+> "Bilgisayarınıza kötü niyetli planlar kuranları korkudan çılgına çevirecek bir program!"
 
 Bilgisayarınızın kamerasıyla önündeki hareketi algılayan, alarm çalan, olayı
 **zaman damgalı video ve fotoğraf** olarak kaydeden ve size **e-posta** ile
